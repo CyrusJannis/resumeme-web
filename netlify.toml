@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://placeholder.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "placeholder_key"
+  NEXTAUTH_SECRET = "REDACTED_NEXTAUTH_SECRET"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

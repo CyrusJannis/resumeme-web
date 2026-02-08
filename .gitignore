@@ -1,0 +1,12 @@
+# See: https://nextjs.org/docs/getting-started/project-structure#top-level-files
+.next/
+node_modules/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+.DS_Store
+*.swp
+*.swo
+*~
