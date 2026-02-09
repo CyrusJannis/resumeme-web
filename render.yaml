@@ -1,10 +1,28 @@
 services:
   - type: web
-    name: resumeme
+    name: resumeme-web
     env: node
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        scope: build,runtime
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        scope: build,runtime
+      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        scope: build,runtime
+      - key: STRIPE_SECRET_KEY
+        scope: runtime
+      - key: NEXTAUTH_SECRET
+        scope: runtime
+      - key: NEXTAUTH_URL
+        scope: runtime
+      - key: OPENAI_API_KEY
+        scope: runtime
+      - key: SENDGRID_API_KEY
+        scope: runtime
+      - key: NEXT_PUBLIC_APP_URL
+        scope: build,runtime
+      - key: ADMIN_EMAILS
+        scope: runtime

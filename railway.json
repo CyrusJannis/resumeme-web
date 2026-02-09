@@ -1,11 +1,29 @@
 {
-  "name": "ResizeMe",
-  "description": "AI Resume Builder",
-  "keywords": ["nextjs", "react", "resume"],
-  "buildCommand": "npm run build",
-  "startCommand": "npm run start",
-  "envs": {
-    "NODE_ENV": "production",
-    "PORT": "3000"
+  "$schema": "https://railway.app/railway.schema.json",
+  "deploy": {
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 5
+  },
+  "services": {
+    "resumeme": {
+      "image": "node:22-alpine",
+      "watchPatterns": [
+        "src/**",
+        "app/**",
+        "lib/**",
+        "package.json",
+        "package-lock.json"
+      ],
+      "build": {
+        "builder": "dockerfile"
+      },
+      "start": "npm run start",
+      "buildCommand": "npm install && npm run build",
+      "port": 3000,
+      "environment": {
+        "NODE_ENV": "production",
+        "NEXT_PUBLIC_APP_URL": "${{ Railway.publicDomain }}"
+      }
+    }
   }
 }
