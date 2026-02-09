@@ -75,7 +75,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-8 shadow-2xl">
           <h1 className="text-3xl font-bold text-white mb-2 text-center">
-            ResizeMe
+            ResumeME
           </h1>
           <p className="text-slate-400 text-center mb-8">
             Create your account to get started

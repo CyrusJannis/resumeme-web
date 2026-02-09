@@ -123,7 +123,7 @@ export default function HomePage() {
             Ready to land your dream job?
           </h2>
           <p className="text-xl text-slate-400 mb-8">
-            Start building your perfect resume today with ResizeMe
+            Start building your perfect resume today with ResumeME
           </p>
           {!session && (
             <Link
@@ -139,7 +139,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-slate-900 border-t border-slate-700 py-8 px-8">
         <div className="max-w-6xl mx-auto text-center text-slate-400">
-          <p>© 2026 ResizeMe. All rights reserved.</p>
+          <p>© 2026 ResumeME. All rights reserved.</p>
           <div className="flex gap-6 justify-center mt-4 text-sm">
             <Link href="/privacy" className="hover:text-white">
               Privacy Policy
