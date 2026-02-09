@@ -1,0 +1,109 @@
+// This file documents the database schema for ResizeMe
+// Run SQL queries directly in Supabase console using lib/database-schema.sql
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password_hash     String
+  name              String
+  avatar_url        String?
+  email_verified    Boolean  @default(false)
+  email_verified_at DateTime?
+  verification_token String?
+  reset_token       String?
+  reset_token_expires DateTime?
+  last_login        DateTime?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  resumes       Resume[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  audit_logs    AuditLog[]
+}
+
+model Resume {
+  id        String   @id @default(cuid())
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  title     String
+  content   Json
+  version   Int      @default(1)
+  status    String   @default("draft") // draft, published, archived
+  pdf_url   String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+
+  versions ResumeVersion[]
+
+  @@index([user_id])
+  @@index([status])
+}
+
+model ResumeVersion {
+  id              String   @id @default(cuid())
+  resume_id       String
+  resume          Resume   @relation(fields: [resume_id], references: [id], onDelete: Cascade)
+  version_number  Int
+  content         Json
+  created_by      String
+  created_at      DateTime @default(now())
+
+  @@index([resume_id])
+}
+
+model Subscription {
+  id                    String   @id @default(cuid())
+  user_id               String   @unique
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan                  String   @default("free") // free, pro, premium
+  status                String   @default("active")
+  stripe_customer_id    String?
+  stripe_subscription_id String?
+  current_period_start  DateTime?
+  current_period_end    DateTime?
+  cancel_at_period_end  Boolean  @default(false)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  @@index([stripe_customer_id])
+}
+
+model Invoice {
+  id                 String   @id @default(cuid())
+  user_id            String
+  user               User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  stripe_invoice_id  String   @unique
+  amount             Int
+  currency           String
+  status             String
+  paid_at            DateTime?
+  created_at         DateTime @default(now())
+
+  @@index([user_id])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  user_id     String?
+  user        User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  action      String
+  entity_type String
+  entity_id   String?
+  changes     Json?
+  ip_address  String?
+  created_at  DateTime @default(now())
+
+  @@index([user_id])
+  @@index([created_at])
+}

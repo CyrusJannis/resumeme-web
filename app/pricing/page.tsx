@@ -1,240 +1,216 @@
-// app/pricing/page.tsx
-'use client';
+"use client";
 
-import { useAuth } from '@/lib/auth/context';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+// Dynamic import for Stripe - will load on client
+let stripePromise: any;
 
-const PRICING_PLANS = [
+const PLANS = [
   {
-    name: 'Free',
-    description: 'Perfect for getting started',
-    price: '$0',
-    period: 'Forever',
+    name: "Free",
+    price: "$0",
+    period: "Forever",
+    description: "Perfect to get started",
     features: [
-      '1 Resume',
-      'Basic Editor',
-      'Download as PDF',
-      'Community Support',
+      "1 Resume",
+      "Basic Editor",
+      "No AI Features",
+      "Limited Templates",
     ],
-    cta: 'Current Plan',
-    ctaDisabled: true,
-    popular: false,
-    priceId: 'free',
+    buttonText: "Current Plan",
+    buttonVariant: "outline",
+    priceId: null,
   },
   {
-    name: 'Pro',
-    description: 'Best for job seekers',
-    price: '$9',
-    period: '/month',
+    name: "Pro",
+    price: "$9.99",
+    period: "per month",
+    description: "Best for professionals",
     features: [
-      '5 Resumes',
-      'AI Resume Optimizer',
-      'ATS Score Check',
-      'Cover Letter Generator',
-      'Interview Prep Guide',
-      'Email Support',
+      "5 Resumes",
+      "Advanced Editor",
+      "AI Optimization",
+      "PDF Export",
+      "Priority Support",
     ],
-    cta: 'Upgrade to Pro',
-    ctaDisabled: false,
-    popular: true,
-    priceId: 'price_pro_monthly', // Add real price ID from Stripe
+    buttonText: "Upgrade to Pro",
+    buttonVariant: "primary",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO,
+    highlighted: true,
   },
   {
-    name: 'Premium',
-    description: 'For career changers',
-    price: '$19',
-    period: '/month',
+    name: "Premium",
+    price: "$19.99",
+    period: "per month",
+    description: "For the ambitious",
     features: [
-      'Unlimited Resumes',
-      'AI Resume Optimizer',
-      'ATS Score Check',
-      'Cover Letter Generator',
-      'Interview Prep Guide',
-      'LinkedIn Optimization',
-      'Priority Support',
-      'Custom Templates',
+      "20 Resumes",
+      "Premium Editor",
+      "AI Everything",
+      "Cover Letter Generator",
+      "Advanced Analytics",
+      "24/7 Support",
     ],
-    cta: 'Upgrade to Premium',
-    ctaDisabled: false,
-    popular: false,
-    priceId: 'price_premium_monthly', // Add real price ID from Stripe
+    buttonText: "Upgrade to Premium",
+    buttonVariant: "primary",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM,
   },
 ];
 
 export default function PricingPage() {
-  const { user, loading } = useAuth();
+  const { data: session } = useSession();
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = async (priceId: string) => {
-    if (!user) {
-      router.push('/auth/login');
+  const handleUpgrade = async (priceId: string | null | undefined) => {
+    if (!priceId) return;
+
+    if (!session?.user?.id) {
+      router.push("/auth/login");
       return;
     }
 
-    setSelectedPlan(priceId);
-    setIsLoading(true);
-
+    setLoading(true);
     try {
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           priceId,
-          userId: user.id,
+          userId: session.user.id,
         }),
       });
 
-      const data = await response.json();
-      if (data.sessionId) {
-        // Redirect to Stripe checkout
-        window.location.href = `https://checkout.stripe.com/pay/${data.sessionId}`;
+      if (!response.ok) throw new Error("Failed to create checkout session");
+
+      const { sessionId } = await response.json();
+
+      // Redirect to Stripe checkout
+      if (typeof window !== "undefined") {
+        window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to start checkout. Please try again.');
+      console.error("Checkout error:", error);
+      alert("Failed to start checkout");
     } finally {
-      setIsLoading(false);
-      setSelectedPlan(null);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Header */}
-      <header className="bg-slate-950 border-b border-slate-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-white">
-            Resume<span className="text-purple-400">ME</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            {!loading && user ? (
-              <Link
-                href="/dashboard"
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
-              >
-                Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="px-4 py-2 text-slate-300 hover:text-white"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Pricing Section */}
-      <main className="max-w-7xl mx-auto px-4 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">Simple, Transparent Pricing</h1>
+          <h1 className="text-5xl font-bold text-white mb-4">
+            Simple, Transparent Pricing
+          </h1>
           <p className="text-xl text-slate-400">
-            Choose the plan that fits your needs. Upgrade or downgrade anytime.
+            Choose the plan that fits your needs
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {PRICING_PLANS.map((plan) => (
+        <div className="grid md:grid-cols-3 gap-8">
+          {PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-lg border transition ${
-                plan.popular
-                  ? 'border-purple-500 bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-purple-500/20 md:scale-105'
-                  : 'border-slate-700 bg-slate-800'
+              className={`rounded-xl p-8 backdrop-blur transition transform hover:scale-105 ${
+                plan.highlighted
+                  ? "bg-gradient-to-br from-blue-600/20 to-purple-600/20 border-2 border-blue-500 shadow-2xl"
+                  : "bg-slate-700/50 border border-slate-600"
               }`}
             >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  Most Popular
+              {plan.highlighted && (
+                <div className="absolute top-0 right-0 bg-blue-600 text-white px-4 py-1 rounded-bl-lg text-sm font-semibold">
+                  MOST POPULAR
                 </div>
               )}
 
-              <div className="p-8">
-                {/* Plan Name */}
-                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                <p className="text-slate-400 text-sm mb-6">{plan.description}</p>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {plan.name}
+              </h3>
+              <p className="text-slate-400 text-sm mb-4">
+                {plan.description}
+              </p>
 
-                {/* Price */}
-                <div className="mb-6">
-                  <span className="text-5xl font-bold text-white">{plan.price}</span>
-                  <span className="text-slate-400 ml-2">{plan.period}</span>
-                </div>
+              <div className="mb-6">
+                <span className="text-5xl font-bold text-white">
+                  {plan.price}
+                </span>
+                <span className="text-slate-400 text-sm ml-2">
+                  {plan.period}
+                </span>
+              </div>
 
-                {/* CTA Button */}
-                <button
-                  onClick={() => handleUpgrade(plan.priceId)}
-                  disabled={plan.ctaDisabled || (selectedPlan === plan.priceId && isLoading)}
-                  className={`w-full py-3 px-4 rounded-lg font-semibold transition mb-8 ${
-                    plan.ctaDisabled
-                      ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                      : plan.popular
-                      ? 'bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600 text-white'
-                  }`}
-                >
-                  {selectedPlan === plan.priceId && isLoading ? 'Processing...' : plan.cta}
-                </button>
+              <button
+                onClick={() => handleUpgrade(plan.priceId)}
+                disabled={loading || !plan.priceId}
+                className={`w-full py-3 rounded-lg font-semibold transition mb-8 ${
+                  plan.buttonVariant === "primary"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 disabled:opacity-50"
+                    : "bg-slate-600 text-white hover:bg-slate-500"
+                }`}
+              >
+                {loading ? "Processing..." : plan.buttonText}
+              </button>
 
-                {/* Features */}
-                <ul className="space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-slate-300">
-                      <span className="text-purple-400">✓</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+              <div className="space-y-3">
+                {plan.features.map((feature, idx) => (
+                  <div key={idx} className="flex items-start">
+                    <span className="text-emerald-400 mr-3">✓</span>
+                    <span className="text-slate-300 text-sm">{feature}</span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
         </div>
 
-        {/* FAQ Section */}
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
-          <div className="space-y-6">
-            {[
-              {
-                q: 'Can I change my plan anytime?',
-                a: 'Yes! Upgrade or downgrade anytime. Changes take effect at the next billing cycle.',
-              },
-              {
-                q: 'Do you offer refunds?',
-                a: 'We offer a 14-day money-back guarantee if you\'re not satisfied.',
-              },
-              {
-                q: 'What payment methods do you accept?',
-                a: 'We accept all major credit cards, Apple Pay, and Google Pay through Stripe.',
-              },
-              {
-                q: 'Is there a contract?',
-                a: 'No! You can cancel anytime with just one click.',
-              },
-            ].map((item, idx) => (
-              <div key={idx} className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-white mb-2">{item.q}</h3>
-                <p className="text-slate-400">{item.a}</p>
-              </div>
-            ))}
+        {/* FAQ */}
+        <div className="mt-20">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            Frequently Asked Questions
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+              <h3 className="text-lg font-bold text-white mb-2">
+                Can I cancel anytime?
+              </h3>
+              <p className="text-slate-400">
+                Yes, you can cancel your subscription at any time. No questions
+                asked.
+              </p>
+            </div>
+            <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+              <h3 className="text-lg font-bold text-white mb-2">
+                Is there a trial period?
+              </h3>
+              <p className="text-slate-400">
+                Start with our Free plan and upgrade whenever you're ready.
+              </p>
+            </div>
+            <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+              <h3 className="text-lg font-bold text-white mb-2">
+                What payment methods do you accept?
+              </h3>
+              <p className="text-slate-400">
+                We accept all major credit cards and digital payment methods via
+                Stripe.
+              </p>
+            </div>
+            <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+              <h3 className="text-lg font-bold text-white mb-2">
+                Do you offer refunds?
+              </h3>
+              <p className="text-slate-400">
+                Yes, 30-day money-back guarantee on all paid plans.
+              </p>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

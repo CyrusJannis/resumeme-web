@@ -1,127 +1,157 @@
-// app/dashboard/page.tsx
-'use client';
+"use client";
 
-import { useAuth } from '@/lib/auth/context';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+
+interface Resume {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  status: string;
+}
 
 export default function DashboardPage() {
-  const { user, loading, signOut } = useAuth();
-  const router = useRouter();
+  const { data: session, status } = useSession();
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalResumes: 0,
+    lastUpdated: null as string | null,
+  });
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
+    if (status === "authenticated") {
+      loadResumes();
     }
-  }, [user, loading, router]);
+  }, [status]);
 
-  if (loading) {
+  const loadResumes = async () => {
+    try {
+      const response = await fetch("/api/resumes");
+      if (response.ok) {
+        const data = await response.json();
+        setResumes(data);
+        setStats({
+          totalResumes: data.length,
+          lastUpdated: data[0]?.updated_at || null,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load resumes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
       </div>
     );
   }
 
-  const handleLogout = async () => {
-    await signOut();
-    router.push('/');
-  };
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Please log in</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-900">
-      {/* Header */}
-      <header className="bg-slate-950 border-b border-slate-800 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-white">
-            Resume<span className="text-purple-400">ME</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-slate-300">{user?.email}</span>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* Welcome Section */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Welcome, {user?.email?.split('@')[0]}!
+          <h1 className="text-5xl font-bold text-white mb-2">
+            Welcome, {session?.user?.name || "User"}!
           </h1>
-          <p className="text-slate-400 text-lg">
-            Your current plan: <span className="text-purple-400 font-semibold uppercase">{user?.plan}</span>
-          </p>
+          <p className="text-slate-400">Manage your resumes and subscriptions</p>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {/* New Resume */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/20 transition cursor-pointer">
-            <div className="text-4xl mb-4">📄</div>
-            <h3 className="text-xl font-semibold text-white mb-2">Create Resume</h3>
-            <p className="text-slate-400 text-sm mb-4">
-              Start building your perfect resume with our AI-powered editor
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-6 mb-12">
+          <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+            <p className="text-slate-400 text-sm">Total Resumes</p>
+            <p className="text-4xl font-bold text-white mt-2">
+              {stats.totalResumes}
             </p>
-            <Link
-              href="/editor/new"
-              className="inline-block px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
-            >
-              Create New
-            </Link>
           </div>
-
-          {/* Upload Resume */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/20 transition cursor-pointer">
-            <div className="text-4xl mb-4">⬆️</div>
-            <h3 className="text-xl font-semibold text-white mb-2">Upload Resume</h3>
-            <p className="text-slate-400 text-sm mb-4">
-              Import your existing resume and let AI optimize it
-            </p>
-            <Link
-              href="/editor/upload"
-              className="inline-block px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition"
-            >
-              Upload
-            </Link>
+          <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+            <p className="text-slate-400 text-sm">Status</p>
+            <p className="text-xl font-bold text-emerald-400 mt-2">Active</p>
           </div>
+          <div className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600">
+            <p className="text-slate-400 text-sm">Plan</p>
+            <p className="text-xl font-bold text-blue-400 mt-2">Pro</p>
+          </div>
+        </div>
 
-          {/* Upgrade Plan */}
-          {user?.plan === 'free' && (
-            <div className="bg-gradient-to-br from-purple-900/50 to-cyan-900/50 border border-purple-500/50 rounded-lg p-6 hover:shadow-lg hover:shadow-purple-500/20 transition cursor-pointer">
-              <div className="text-4xl mb-4">🚀</div>
-              <h3 className="text-xl font-semibold text-white mb-2">Upgrade Plan</h3>
-              <p className="text-slate-300 text-sm mb-4">
-                Unlock unlimited resumes and premium features
-              </p>
+        {/* Actions */}
+        <div className="flex gap-4 mb-12">
+          <Link
+            href="/editor/new"
+            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+          >
+            + Create New Resume
+          </Link>
+          <Link
+            href="/pricing"
+            className="px-8 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 font-semibold"
+          >
+            Upgrade Plan
+          </Link>
+        </div>
+
+        {/* Resumes List */}
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-6">Your Resumes</h2>
+          {resumes.length === 0 ? (
+            <div className="bg-slate-700/50 backdrop-blur p-12 rounded-xl border border-slate-600 text-center">
+              <p className="text-slate-400 mb-6">No resumes yet</p>
               <Link
-                href="/pricing"
-                className="inline-block px-4 py-2 bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-white rounded-lg transition"
+                href="/editor/new"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                View Plans
+                Create First Resume
               </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {resumes.map((resume) => (
+                <div
+                  key={resume.id}
+                  className="bg-slate-700/50 backdrop-blur p-6 rounded-xl border border-slate-600 hover:border-blue-500 transition cursor-pointer group"
+                >
+                  <Link href={`/editor/${resume.id}`}>
+                    <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition">
+                      {resume.title}
+                    </h3>
+                  </Link>
+                  <p className="text-slate-400 text-sm mt-2">
+                    Updated{" "}
+                    {new Date(resume.updated_at).toLocaleDateString()}
+                  </p>
+                  <div className="flex gap-3 mt-4">
+                    <Link
+                      href={`/editor/${resume.id}`}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded text-center hover:bg-blue-700"
+                    >
+                      Edit
+                    </Link>
+                    <button className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700">
+                      Export PDF
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
-
-        {/* Your Resumes */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6">Your Resumes</h2>
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-8 text-center">
-            <p className="text-slate-400 mb-4">No resumes yet</p>
-            <p className="text-slate-500 text-sm">
-              Create your first resume to get started
-            </p>
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

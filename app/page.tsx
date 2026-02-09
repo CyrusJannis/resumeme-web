@@ -1,247 +1,155 @@
-export default function Home() {
+"use client";
+
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { ArrowRight, Sparkles, FileText, Zap } from "lucide-react";
+
+export default function HomePage() {
+  const { data: session } = useSession();
+
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full bg-slate-900/80 backdrop-blur border-b border-slate-700 z-50">
+        <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-white">ResumeME</div>
+          <div className="flex gap-6 items-center">
+            <Link href="/pricing" className="text-slate-400 hover:text-white">
+              Pricing
+            </Link>
+            {session ? (
+              <Link
+                href="/dashboard"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-slate-400 hover:text-white"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section */}
-      <section className="hero">
-        <div className="container text-center">
-          <h1 className="text-5xl text-md-6xl mb-6 gradient-text" style={{ fontWeight: 'bold' }}>
-            Your Resume, AI-Optimized
+      <section className="pt-32 pb-20 px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            Your AI-Powered Resume Builder
           </h1>
-          
-          <p className="text-large text-gray mb-8" style={{ maxWidth: '600px', margin: '0 auto 2rem' }}>
-            Build an ATS-optimized resume in minutes. Let AI do the heavy lifting while you focus on landing interviews.
+          <p className="text-2xl text-slate-400 mb-12">
+            Create stunning, ATS-optimized resumes in minutes with AI assistance
           </p>
-          
-          <div className="flex flex-col flex-md-row gap-4 items-center justify-center">
-            <button className="button-primary" style={{ fontSize: '1.125rem' }}>
-              Start Free
-            </button>
-            <button className="button-secondary" style={{ fontSize: '1.125rem' }}>
-              Watch Demo
-            </button>
-          </div>
-
-          <p className="text-gray mb-16" style={{ fontSize: '0.875rem', marginTop: '1.5rem' }}>
-            ✓ No credit card required • ✓ Takes 5 minutes • ✓ Free forever plan
-          </p>
-        </div>
-      </section>
-
-      {/* Value Propositions */}
-      <section className="section" style={{ background: 'rgba(30, 41, 59, 0.3)' }}>
-        <div className="container">
-          <h2 className="text-4xl text-center mb-4 gradient-text" style={{ fontWeight: 'bold' }}>
-            Why Choose ResizeMe?
-          </h2>
-          
-          <p className="text-center text-gray mb-16 text-large" style={{ maxWidth: '600px', margin: '0 auto 4rem' }}>
-            Everything you need to land your dream job, powered by cutting-edge AI.
-          </p>
-
-          <div className="grid grid-3">
-            <div className="card">
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎯</div>
-              <h3 className="text-xl text-white mb-4" style={{ fontWeight: 'bold' }}>ATS-Optimized</h3>
-              <p className="text-gray">Pass applicant tracking systems with our AI-powered formatting and keyword optimization.</p>
-            </div>
-
-            <div className="card">
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
-              <h3 className="text-xl text-white mb-4" style={{ fontWeight: 'bold' }}>AI Cover Letter</h3>
-              <p className="text-gray">Generate personalized cover letters in seconds. Tailored to each job description.</p>
-            </div>
-
-            <div className="card">
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💬</div>
-              <h3 className="text-xl text-white mb-4" style={{ fontWeight: 'bold' }}>Interview Prep</h3>
-              <p className="text-gray">Get AI-powered mock interviews and personalized tips to ace your next meeting.</p>
-            </div>
+          <div className="flex gap-6 justify-center">
+            {session ? (
+              <Link
+                href="/editor/new"
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 flex items-center gap-2"
+              >
+                Start Building <ArrowRight size={20} />
+              </Link>
+            ) : (
+              <Link
+                href="/auth/signup"
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 flex items-center gap-2"
+              >
+                Get Started Free <ArrowRight size={20} />
+              </Link>
+            )}
+            <Link
+              href="/pricing"
+              className="px-8 py-4 bg-slate-700 text-white text-lg font-semibold rounded-lg hover:bg-slate-600"
+            >
+              View Pricing
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="section">
-        <div className="container">
-          <h2 className="text-4xl text-center mb-4 gradient-text" style={{ fontWeight: 'bold' }}>
-            How It Works
+      {/* Features Section */}
+      <section className="py-20 px-8 bg-slate-800/50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-white text-center mb-16">
+            Powerful Features
           </h2>
-          
-          <p className="text-center text-gray mb-16 text-large" style={{ maxWidth: '600px', margin: '0 auto 4rem' }}>
-            From resume to dream job in three simple steps.
-          </p>
-
-          <div className="grid grid-3">
-            <div className="card">
-              <div style={{ fontSize: '3rem', color: '#a855f7', fontWeight: 'bold', marginBottom: '1rem' }}>01</div>
-              <h3 className="text-xl text-white mb-4" style={{ fontWeight: 'bold' }}>Upload Your Resume</h3>
-              <p className="text-gray">Start with your existing resume or create one from scratch. Our AI analyzes every detail.</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-slate-700/50 backdrop-blur p-8 rounded-xl border border-slate-600">
+              <Sparkles className="text-yellow-400 mb-4" size={32} />
+              <h3 className="text-xl font-bold text-white mb-3">AI Optimization</h3>
+              <p className="text-slate-400">
+                Get intelligent suggestions to improve your resume and increase
+                your chances of getting hired
+              </p>
             </div>
-
-            <div className="card">
-              <div style={{ fontSize: '3rem', color: '#a855f7', fontWeight: 'bold', marginBottom: '1rem' }}>02</div>
-              <h3 className="text-xl text-white mb-4" style={{ fontWeight: 'bold' }}>AI Optimization</h3>
-              <p className="text-gray">Our AI engine optimizes formatting, keywords, and content for maximum ATS compatibility.</p>
+            <div className="bg-slate-700/50 backdrop-blur p-8 rounded-xl border border-slate-600">
+              <FileText className="text-blue-400 mb-4" size={32} />
+              <h3 className="text-xl font-bold text-white mb-3">
+                Professional Templates
+              </h3>
+              <p className="text-slate-400">
+                Choose from industry-leading templates designed by professionals
+              </p>
             </div>
-
-            <div className="card">
-              <div style={{ fontSize: '3rem', color: '#a855f7', fontWeight: 'bold', marginBottom: '1rem' }}>03</div>
-              <h3 className="text-xl text-white mb-4" style={{ fontWeight: 'bold' }}>Download & Apply</h3>
-              <p className="text-gray">Download your polished resume and tailored cover letter. Start applying with confidence.</p>
+            <div className="bg-slate-700/50 backdrop-blur p-8 rounded-xl border border-slate-600">
+              <Zap className="text-emerald-400 mb-4" size={32} />
+              <h3 className="text-xl font-bold text-white mb-3">
+                Instant PDF Export
+              </h3>
+              <p className="text-slate-400">
+                Download and share your resume as a beautifully formatted PDF
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="section" style={{ background: 'rgba(30, 41, 59, 0.3)' }}>
-        <div className="container">
-          <h2 className="text-4xl text-center mb-4 gradient-text" style={{ fontWeight: 'bold' }}>
-            Simple, Transparent Pricing
+      {/* CTA Section */}
+      <section className="py-20 px-8">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur p-16 rounded-2xl border border-blue-500/50 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to land your dream job?
           </h2>
-          
-          <p className="text-center text-gray mb-16 text-large" style={{ maxWidth: '600px', margin: '0 auto 4rem' }}>
-            Choose the plan that fits your career goals.
+          <p className="text-xl text-slate-400 mb-8">
+            Start building your perfect resume today with ResizeMe
           </p>
-
-          <div className="grid grid-3">
-            <div className="card">
-              <h3 className="text-2xl text-white mb-4" style={{ fontWeight: 'bold' }}>Free</h3>
-              <div className="mb-6">
-                <span className="text-4xl text-white" style={{ fontWeight: 'bold' }}>$0</span>
-                <span className="text-gray" style={{ marginLeft: '0.5rem' }}>/Forever</span>
-              </div>
-              
-              <button className="button-secondary" style={{ width: '100%', marginBottom: '2rem' }}>
-                Get Started
-              </button>
-              
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  Basic resume optimization
-                </li>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  ATS compatibility check
-                </li>
-              </ul>
-            </div>
-
-            <div className="card" style={{ 
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(30, 41, 59, 0.8))',
-              border: '2px solid #a855f7',
-              transform: 'scale(1.05)',
-              position: 'relative'
-            }}>
-              <div style={{
-                position: 'absolute',
-                top: '-1rem',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: '#22d3ee',
-                color: '#0f172a',
-                padding: '0.25rem 1rem',
-                borderRadius: '9999px',
-                fontSize: '0.875rem',
-                fontWeight: 'bold'
-              }}>
-                Most Popular
-              </div>
-              
-              <h3 className="text-2xl text-white mb-4" style={{ fontWeight: 'bold' }}>Pro</h3>
-              <div className="mb-6">
-                <span className="text-4xl text-white" style={{ fontWeight: 'bold' }}>$19</span>
-                <span className="text-gray" style={{ marginLeft: '0.5rem' }}>/Month</span>
-              </div>
-              
-              <button className="button-primary" style={{ width: '100%', marginBottom: '2rem', background: '#22d3ee', color: '#0f172a' }}>
-                Get Started
-              </button>
-              
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  Everything in Free
-                </li>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  Unlimited resumes
-                </li>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  AI cover letter generation
-                </li>
-              </ul>
-            </div>
-
-            <div className="card">
-              <h3 className="text-2xl text-white mb-4" style={{ fontWeight: 'bold' }}>Premium</h3>
-              <div className="mb-6">
-                <span className="text-4xl text-white" style={{ fontWeight: 'bold' }}>$49</span>
-                <span className="text-gray" style={{ marginLeft: '0.5rem' }}>/Month</span>
-              </div>
-              
-              <button className="button-secondary" style={{ width: '100%', marginBottom: '2rem' }}>
-                Get Started
-              </button>
-              
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  Everything in Pro
-                </li>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  Personal career coach
-                </li>
-                <li className="flex items-center text-gray" style={{ marginBottom: '1rem' }}>
-                  <span style={{ color: '#10b981', marginRight: '0.75rem' }}>✓</span>
-                  LinkedIn optimization
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="section" style={{ 
-        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 211, 238, 0.2))',
-        borderTop: '1px solid #334155'
-      }}>
-        <div className="container text-center">
-          <h2 className="text-4xl mb-4 gradient-text" style={{ fontWeight: 'bold' }}>
-            Ready to Land Your Dream Job?
-          </h2>
-          
-          <p className="text-large text-gray mb-8" style={{ maxWidth: '600px', margin: '0 auto 2rem' }}>
-            Join thousands of professionals who've transformed their job search with ResizeMe. Start free today — no credit card required.
-          </p>
-          
-          <button className="button-primary" style={{ fontSize: '1.125rem', padding: '1rem 2.5rem' }}>
-            Start Free
-          </button>
-
-          <p className="text-gray" style={{ fontSize: '0.875rem', marginTop: '1.5rem' }}>
-            ✓ Takes 5 minutes • ✓ Free forever plan • ✓ Premium features included
-          </p>
+          {!session && (
+            <Link
+              href="/auth/signup"
+              className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 flex items-center gap-2"
+            >
+              Get Started Now <ArrowRight size={20} />
+            </Link>
+          )}
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ 
-        background: '#020617',
-        borderTop: '1px solid #334155',
-        padding: '3rem 0',
-        textAlign: 'center'
-      }}>
-        <div className="container">
-          <p className="text-gray" style={{ fontSize: '0.875rem' }}>© 2024 ResizeMe. All rights reserved.</p>
-          <div className="flex gap-4 justify-center" style={{ marginTop: '1rem' }}>
-            <a href="#" className="text-gray" style={{ textDecoration: 'none' }}>Twitter</a>
-            <a href="#" className="text-gray" style={{ textDecoration: 'none' }}>LinkedIn</a>
-            <a href="#" className="text-gray" style={{ textDecoration: 'none' }}>GitHub</a>
+      <footer className="bg-slate-900 border-t border-slate-700 py-8 px-8">
+        <div className="max-w-6xl mx-auto text-center text-slate-400">
+          <p>© 2026 ResizeMe. All rights reserved.</p>
+          <div className="flex gap-6 justify-center mt-4 text-sm">
+            <Link href="/privacy" className="hover:text-white">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-white">
+              Terms of Service
+            </Link>
+            <Link href="/contact" className="hover:text-white">
+              Contact Us
+            </Link>
           </div>
         </div>
       </footer>
