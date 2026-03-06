@@ -5,7 +5,7 @@
 [build.environment]
   NEXT_PUBLIC_SUPABASE_URL = "https://placeholder.supabase.co"
   NEXT_PUBLIC_SUPABASE_ANON_KEY = "placeholder_key"
-  NEXTAUTH_SECRET = "REDACTED_NEXTAUTH_SECRET"
+  # NEXTAUTH_SECRET must be set in Netlify dashboard under Site Settings > Environment Variables
 
 [[redirects]]
   from = "/*"
